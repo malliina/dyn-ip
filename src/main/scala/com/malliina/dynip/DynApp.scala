@@ -2,7 +2,7 @@ package com.malliina.dynip
 
 import cats.effect.{IO, IOApp}
 
-object Hello extends IOApp.Simple:
+object DynApp extends IOApp.Simple:
   override def run: IO[Unit] =
     Dyn
       .resource[IO]
