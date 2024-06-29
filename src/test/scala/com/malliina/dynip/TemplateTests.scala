@@ -1,4 +1,4 @@
-package com.malliina.template
+package com.malliina.dynip
 
 import cats.{Eq, Show}
 import io.circe.parser.decode
