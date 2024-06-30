@@ -8,6 +8,7 @@ val dynip = project
     libraryDependencies ++= Seq(
       "com.malliina" %% "okclient-io" % libVersion,
       "com.malliina" %% "config" % libVersion,
+      "com.malliina" %% "logback-fs2" % "2.7.0",
       "org.scalameta" %% "munit" % "1.0.0" % Test
     )
   )

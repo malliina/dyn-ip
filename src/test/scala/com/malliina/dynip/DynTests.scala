@@ -6,6 +6,6 @@ import io.circe.syntax.EncoderOps
 import scala.concurrent.duration.Duration
 import concurrent.duration.DurationInt
 
-class TemplateTests extends munit.FunSuite:
+class DynTests extends munit.FunSuite:
   test("can run test"):
     assertEquals(1, 1)
