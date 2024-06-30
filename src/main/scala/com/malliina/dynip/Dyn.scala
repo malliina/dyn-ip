@@ -51,7 +51,7 @@ class Dyn[F[_]: Async](zone: ZoneId, domain: String, token: APIToken, http: Http
       record <- F.fromEither(
         records.result
           .find(r => r.name == domain && r.`type` == recordType)
-          .toRight(Exception(s"$recordType record for '$domain' not found."))
+          .toRight(RecordNotFound(recordType, domain))
       )
       _ <- compareAndUpdate(ip.ip, record)
     yield ()

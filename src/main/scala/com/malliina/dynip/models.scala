@@ -60,3 +60,6 @@ case class DNSRecord(
 case class Records(result: List[DNSRecord]) derives Codec.AsObject
 
 case class RecordResult(result: DNSRecord) derives Codec.AsObject
+
+class RecordNotFound(recordType: RecordType, domain: String)
+  extends Exception(s"$recordType record for '$domain' not found.")
