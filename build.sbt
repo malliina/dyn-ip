@@ -2,6 +2,7 @@ val libVersion = "3.6.0"
 
 val dynip = project
   .in(file("."))
+  .enablePlugins(DebPlugin)
   .settings(
     version := "0.0.1",
     scalaVersion := "3.4.0",
