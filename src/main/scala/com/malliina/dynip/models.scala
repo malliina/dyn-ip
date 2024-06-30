@@ -24,6 +24,21 @@ object APIToken:
   given show: Show[APIToken] = t => t
   given ConfigReadable[APIToken] = ConfigReadable.string.map(t => t)
 
+enum RecordType(val name: String):
+  case A extends RecordType("A")
+  case CNAME extends RecordType("CNAME")
+  case Other(n: String) extends RecordType(n)
+  override def toString: String = name
+
+object RecordType:
+  private def fromString(s: String) =
+    Seq(A, CNAME).find(_.name.toLowerCase == s.toLowerCase).getOrElse(Other(s))
+
+  given Codec[RecordType] = Codec.from(
+    Decoder.decodeString.map(s => fromString(s)),
+    Encoder.encodeString.contramap(_.name)
+  )
+
 /** Response from ipify.org.
   */
 case class IPResponse(ip: String) derives Codec.AsObject
@@ -37,7 +52,7 @@ case class DNSRecord(
   id: RecordId,
   content: String,
   name: String,
-  `type`: String,
+  `type`: RecordType,
   comment: Option[String],
   ttl: Option[FiniteDuration]
 ) derives Codec.AsObject

@@ -25,7 +25,8 @@ object Dyn:
     yield Dyn(conf.zone, conf.domain, conf.token, http)
 
 class Dyn[F[_]: Async](zone: ZoneId, domain: String, token: APIToken, http: HttpClientF2[F]):
-  log.info(s"Managing zone '$zone'.")
+  private val recordType = RecordType.A
+  log.info(s"Managing $recordType record of domain '$domain' in zone '$zone'.")
   private val F = Async[F]
 
   private val zones = FullUrl.https("api.cloudflare.com", "/client/v4/zones")
@@ -44,29 +45,34 @@ class Dyn[F[_]: Async](zone: ZoneId, domain: String, token: APIToken, http: Http
     for
       ip <- http.getAs[IPResponse](FullUrl.https("api.ipify.org", "").withQuery("format" -> "json"))
       records <- http.getAs[Records](
-        recordsUrl.withQuery("name" -> domain, "type" -> "A"),
-        Map("Authorization" -> s"Bearer $token")
+        recordsUrl.withQuery("name" -> domain, "type" -> RecordType.A.name),
+        authHeaders
       )
       record <- F.fromEither(
         records.result
-          .find(r => r.name == domain && r.`type` == "A")
-          .toRight(Exception(s"A record for '$domain' not found."))
+          .find(r => r.name == domain && r.`type` == recordType)
+          .toRight(Exception(s"$recordType record for '$domain' not found."))
       )
       _ <- compareAndUpdate(ip.ip, record)
     yield ()
 
   private def compareAndUpdate(ip: String, record: DNSRecord) =
     if ip != record.content then updateRecord(ip, record.id)
-    else F.delay(log.info(s"IP is $ip, A record for $domain is ${record.content}. No changes."))
+    else
+      F.delay(
+        log.info(
+          s"IP is $ip, ${record.`type`} record for '$domain' is '${record.content}'. No changes."
+        )
+      )
 
   private def updateRecord(ip: String, record: RecordId) =
     val now = DateTimeFormatter.ISO_DATE_TIME.format(OffsetDateTime.now())
     val dnsRecord =
-      DNSRecord(record, ip, domain, "A", Option(s"Updated via API at $now."), ttl = None)
+      DNSRecord(record, ip, domain, recordType, Option(s"Updated via API at $now."), ttl = None)
     val body = RequestBody.create(dnsRecord.asJson.toString, OkClient.jsonMediaType)
     val url = recordUrl(record)
     val req = HttpClient
-      .requestFor(url, Map("Authorization" -> s"Bearer $token"))
+      .requestFor(url, authHeaders)
       .put(body)
       .build()
     http
@@ -74,4 +80,8 @@ class Dyn[F[_]: Async](zone: ZoneId, domain: String, token: APIToken, http: Http
       .flatMap(res => http.parse[RecordResult](res, url))
       .map: res =>
         val updated = res.result
-        log.info(s"Updated the ${updated.`type`} record ${updated.name} to ${updated.content}.")
+        log.info(
+          s"Updated the ${updated.`type`} record of '${updated.name}' to '${updated.content}'."
+        )
+
+  private def authHeaders = Map("Authorization" -> s"Bearer $token")
