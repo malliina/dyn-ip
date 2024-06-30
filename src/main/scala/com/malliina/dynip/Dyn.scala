@@ -1,11 +1,13 @@
 package com.malliina.dynip
 
+import cats.effect.std.Dispatcher
 import cats.effect.{Async, Resource}
 import cats.implicits.toShow
 import cats.syntax.all.*
 import com.malliina.dynip.Dyn.log
 import com.malliina.http.io.{HttpClientF2, HttpClientIO}
 import com.malliina.http.{FullUrl, HttpClient, OkClient}
+import com.malliina.logstreams.client.LogstreamsUtils
 import com.malliina.util.AppLogger
 import fs2.Stream
 import io.circe.syntax.EncoderOps
@@ -20,8 +22,10 @@ object Dyn:
 
   def resource[F[_]: Async] =
     for
-      conf <- Resource.eval(Async[F].fromEither(LocalConf.parse()))
       http <- HttpClientIO.resource[F]
+      d <- Dispatcher.parallel[F]
+      conf <- Resource.eval(Async[F].fromEither(LocalConf.parse()))
+      _ <- LogstreamsUtils.resource[F](conf.logs, d, http)
     yield Dyn(conf.zone, conf.domain, conf.token, http)
 
 class Dyn[F[_]: Async](zone: ZoneId, domain: String, token: APIToken, http: HttpClientF2[F]):
