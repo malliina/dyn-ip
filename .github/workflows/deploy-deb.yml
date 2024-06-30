@@ -41,9 +41,8 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
       - name: Build with sbt
         run: |
-          sbt "mode prod" compile
-          sbt "mode prod" Deb/packageBin
+          sbt Deb/packageBin
       - name: Deploy
         run: |
-          scp backend/target/api.deb server:/home/mle/api.deb
-          ssh server 'sudo dpkg --force-confold -i /home/mle/api.deb'
+          scp backend/target/dynip.deb server:/home/mle/dynip.deb
+          ssh server 'sudo dpkg --force-confold -i /home/mle/dynip.deb'
