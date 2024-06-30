@@ -4,11 +4,15 @@ import cats.effect.{Async, Resource}
 import cats.implicits.toShow
 import cats.syntax.all.*
 import com.malliina.dynip.Dyn.log
-import com.malliina.http.FullUrl
 import com.malliina.http.io.{HttpClientF2, HttpClientIO}
+import com.malliina.http.{FullUrl, HttpClient, OkClient}
 import com.malliina.util.AppLogger
 import fs2.Stream
+import io.circe.syntax.EncoderOps
+import okhttp3.RequestBody
 
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import scala.concurrent.duration.DurationInt
 
 object Dyn:
@@ -27,12 +31,14 @@ class Dyn[F[_]: Async](zone: ZoneId, domain: String, token: APIToken, http: Http
   private val zones = FullUrl.https("api.cloudflare.com", "/client/v4/zones")
 
   private def recordsUrl = zones / zone.show / "dns_records"
-  def recordUrl(record: RecordId) = recordsUrl / record.show
+  private def recordUrl(record: RecordId) = recordsUrl / record.show
 
   val program = Stream
     .repeatEval:
-      F.sleep(100.millis) >> checkAndUpdateIp >> F.sleep(2.seconds)
-    .take(3)
+      F.sleep(100.millis) >> checkAndUpdateIpRecovered >> F.sleep(5.minutes)
+
+  private def checkAndUpdateIpRecovered = checkAndUpdateIp.handleError: error =>
+    log.error(s"Failed to check and update IP of $domain.", error)
 
   private def checkAndUpdateIp: F[Unit] =
     for
@@ -46,4 +52,26 @@ class Dyn[F[_]: Async](zone: ZoneId, domain: String, token: APIToken, http: Http
           .find(r => r.name == domain && r.`type` == "A")
           .toRight(Exception(s"A record for '$domain' not found."))
       )
-    yield log.info(s"IP is ${ip.ip}, A record for $domain is ${record.content}.")
+      _ <- compareAndUpdate(ip.ip, record)
+    yield ()
+
+  private def compareAndUpdate(ip: String, record: DNSRecord) =
+    if ip != record.content then updateRecord(ip, record.id)
+    else F.delay(log.info(s"IP is $ip, A record for $domain is ${record.content}. No changes."))
+
+  private def updateRecord(ip: String, record: RecordId) =
+    val now = DateTimeFormatter.ISO_DATE_TIME.format(OffsetDateTime.now())
+    val dnsRecord =
+      DNSRecord(record, ip, domain, "A", Option(s"Updated via API at $now."), ttl = None)
+    val body = RequestBody.create(dnsRecord.asJson.toString, OkClient.jsonMediaType)
+    val url = recordUrl(record)
+    val req = HttpClient
+      .requestFor(url, Map("Authorization" -> s"Bearer $token"))
+      .put(body)
+      .build()
+    http
+      .execute(req)
+      .flatMap(res => http.parse[RecordResult](res, url))
+      .map: res =>
+        val updated = res.result
+        log.info(s"Updated the ${updated.`type`} record ${updated.name} to ${updated.content}.")

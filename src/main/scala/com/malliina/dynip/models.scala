@@ -14,6 +14,10 @@ object ZoneId:
 opaque type RecordId = String
 object RecordId:
   given show: Show[RecordId] = r => r
+  given Codec[RecordId] = Codec.from(
+    Decoder.decodeString.map(s => s),
+    Encoder.encodeString.contramap(r => r)
+  )
 
 opaque type APIToken = String
 object APIToken:
@@ -30,7 +34,7 @@ given durationCodec: Codec[FiniteDuration] = Codec.from(
 )
 
 case class DNSRecord(
-  id: String,
+  id: RecordId,
   content: String,
   name: String,
   `type`: String,
@@ -39,3 +43,5 @@ case class DNSRecord(
 ) derives Codec.AsObject
 
 case class Records(result: List[DNSRecord]) derives Codec.AsObject
+
+case class RecordResult(result: DNSRecord) derives Codec.AsObject
