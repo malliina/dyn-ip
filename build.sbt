@@ -3,19 +3,26 @@ import scala.util.Try
 import sbtbuildinfo.BuildInfoKeys.{buildInfoKeys, buildInfoPackage}
 import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin}
 
-val libVersion = "3.6.0"
+val libVersion = "3.7.1"
+
+val versions = new {
+  val app = "0.0.2"
+  val malliina = "6.10.3"
+  val munit = "1.2.1"
+  val scala = "3.7.4"
+}
 
 val dynip = project
   .in(file("."))
   .enablePlugins(DebPlugin, BuildInfoPlugin)
   .settings(
-    version := "0.0.1",
-    scalaVersion := "3.4.0",
+    version := versions.app,
+    scalaVersion := versions.scala,
     libraryDependencies ++= Seq(
-      "com.malliina" %% "okclient-io" % libVersion,
-      "com.malliina" %% "config" % libVersion,
-      "com.malliina" %% "logstreams-client" % "2.7.0",
-      "org.scalameta" %% "munit" % "1.0.0" % Test
+      "com.malliina" %% "okclient-io" % versions.malliina,
+      "com.malliina" %% "config" % versions.malliina,
+      "com.malliina" %% "logstreams-client" % versions.malliina,
+      "org.scalameta" %% "munit" % versions.munit % Test
     ),
     buildInfoPackage := "com.malliina.dynip",
     buildInfoKeys ++= Seq[BuildInfoKey](

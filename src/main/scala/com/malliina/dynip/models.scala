@@ -6,12 +6,12 @@ import io.circe.{Codec, Decoder, Encoder}
 
 import scala.concurrent.duration.{DurationDouble, FiniteDuration}
 
-opaque type ZoneId = String
+opaque type ZoneId <: String = String
 object ZoneId:
   given show: Show[ZoneId] = z => z
   given ConfigReadable[ZoneId] = ConfigReadable.string.map(z => z)
 
-opaque type RecordId = String
+opaque type RecordId <: String = String
 object RecordId:
   given show: Show[RecordId] = r => r
   given Codec[RecordId] = Codec.from(
@@ -19,7 +19,7 @@ object RecordId:
     Encoder.encodeString.contramap(r => r)
   )
 
-opaque type APIToken = String
+opaque type APIToken <: String = String
 object APIToken:
   given show: Show[APIToken] = t => t
   given ConfigReadable[APIToken] = ConfigReadable.string.map(t => t)
