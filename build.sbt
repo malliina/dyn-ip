@@ -3,15 +3,6 @@ import scala.util.Try
 import sbtbuildinfo.BuildInfoKeys.{buildInfoKeys, buildInfoPackage}
 import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin}
 
-val libVersion = "3.7.1"
-
-val versions = new {
-  val app = "0.0.2"
-  val malliina = "6.10.3"
-  val munit = "1.2.1"
-  val scala = "3.7.4"
-}
-
 val dynip = project
   .in(file("."))
   .enablePlugins(DebPlugin, BuildInfoPlugin)
@@ -35,5 +26,5 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 def gitHash: String =
   sys.env
     .get("GITHUB_SHA")
-    .orElse(Try(Process("git rev-parse HEAD").lineStream.head).toOption)
+    .orElse(Try(Process("git rev-parse HEAD").lazyLines.head).toOption)
     .getOrElse("unknown")
