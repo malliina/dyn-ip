@@ -3,8 +3,8 @@ package com.malliina.dynip
 import cats.{Eq, Show}
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
-import scala.concurrent.duration.Duration
-import concurrent.duration.DurationInt
+
+import scala.concurrent.duration.{Duration, DurationInt}
 
 class DynTests extends munit.FunSuite:
   test("can run test"):

@@ -4,10 +4,9 @@ import cats.effect.std.Dispatcher
 import cats.effect.{Async, Resource}
 import cats.implicits.toShow
 import cats.syntax.all.{catsSyntaxApplicativeError, catsSyntaxFlatMapOps, toFlatMapOps, toFunctorOps}
-import com.malliina.dynip.Dyn.log
-import com.malliina.http.{FullUrl, HttpClient, HttpHeaders, SimpleHttpClient}
-import com.malliina.logstreams.client.LogstreamsUtils
-import com.malliina.util.AppLogger
+import com.malliina.http.{EmberHttpClient, FullUrl, HttpHeaders, SimpleHttpClient}
+import com.malliina.util.Log
+import fs2.io.net.Network
 import fs2.Stream
 
 import java.time.OffsetDateTime
@@ -15,17 +14,20 @@ import java.time.format.DateTimeFormatter
 import scala.concurrent.duration.DurationInt
 
 object Dyn:
-  private val log = AppLogger(getClass)
-
-  def resource[F[_]: Async] =
+  def resource[F[_]: {Async, Network}] =
     for
-      http <- HttpClient.resource[F]()
+      http <- EmberHttpClient.default[F]
       d <- Dispatcher.parallel[F]
       conf <- Resource.eval(Async[F].fromEither(LocalConf.parse()))
-      _ <- LogstreamsUtils.resource[F](conf.logs, d, http)
-    yield Dyn(conf.zone, conf.domain, conf.token, http)
+    yield Dyn(conf.zone, conf.domain, conf.token, http, ScribeLog())
 
-class Dyn[F[_]: Async](zone: ZoneId, domain: String, token: APIToken, http: SimpleHttpClient[F]):
+class Dyn[F[_]: Async](
+  zone: ZoneId,
+  domain: String,
+  token: APIToken,
+  http: SimpleHttpClient[F],
+  log: Log
+):
   private val recordType = RecordType.A
   log.info(s"Managing $recordType record of domain '$domain' in zone '$zone'.")
   private val F = Async[F]

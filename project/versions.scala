@@ -1,5 +1,9 @@
 object versions:
   val app = "0.0.2"
-  val malliina = "6.16.0"
+  val catsEffect = "3.7.1"
+  val fs2 = "3.14.0"
+  val malliina = "6.17.4"
   val munit = "1.3.6"
   val scala = "3.9.0"
+  val scribe = "3.19.0"
+  val sjavatime = "1.5.0"

@@ -3,16 +3,23 @@ import scala.util.Try
 import sbtbuildinfo.BuildInfoKeys.{buildInfoKeys, buildInfoPackage}
 import sbtbuildinfo.{BuildInfoKey, BuildInfoPlugin}
 
-val dynip = project
+inThisBuild(
+  Seq(
+    version := versions.app,
+    scalaVersion := versions.scala
+  )
+)
+
+val dynip = crossProject(JVMPlatform, NativePlatform)
+  .crossType(CrossType.Full)
   .in(file("."))
   .enablePlugins(DebPlugin, BuildInfoPlugin)
   .settings(
-    version := versions.app,
-    scalaVersion := versions.scala,
     libraryDependencies ++= Seq(
-      "com.malliina" %% "okclient-io" % versions.malliina,
+      "com.malliina" %% "http-client-ember" % versions.malliina,
       "com.malliina" %% "config" % versions.malliina,
-      "com.malliina" %% "logstreams-client" % versions.malliina,
+      "com.outr" %% "scribe" % versions.scribe,
+//      "com.malliina" %% "logstreams-client" % versions.malliina,
       "org.scalameta" %% "munit" % versions.munit % Test
     ),
     buildInfoPackage := "com.malliina.dynip",
@@ -20,6 +27,14 @@ val dynip = project
       "gitHash" -> gitHash
     )
   )
+  .nativeSettings(
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %% "scala-java-time" % "2.8.0"
+    )
+  )
+
+val dynipJvm = dynip.jvm
+val dynipNative = dynip.native
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
