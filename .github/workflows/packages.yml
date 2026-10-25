@@ -13,6 +13,9 @@ jobs:
       CMAKE_SHARED_LINKER_FLAGS: "-L${{ github.workspace }}/s2n-tls/s2n-tls-install/lib"
       CMAKE_MODULE_LINKER_FLAGS: "-L${{ github.workspace }}/s2n-tls/s2n-tls-install/lib"
 
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
