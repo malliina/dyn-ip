@@ -10,6 +10,7 @@ env:
 
 jobs:
   deploy:
+    if: false
     name: Build deb
     runs-on: ubuntu-26.04
     steps:
