@@ -9,6 +9,9 @@ jobs:
 
     env:
       BINARY: dynip-${{ github.ref_name }}-linux-aarch64
+      CMAKE_EXE_LINKER_FLAGS: "-L${{ github.workspace }}/s2n-tls/s2n-tls-install/lib"
+      CMAKE_SHARED_LINKER_FLAGS: "-L${{ github.workspace }}/s2n-tls/s2n-tls-install/lib"
+      CMAKE_MODULE_LINKER_FLAGS: "-L${{ github.workspace }}/s2n-tls/s2n-tls-install/lib"
 
     steps:
       - uses: actions/checkout@v7
@@ -30,7 +33,7 @@ jobs:
       - name: Test and build
         run: |
           echo "Building ${{ env.BINARY }}..."
-          sbt "dynipNative/Compile/nativeLink;shutdown"
+          sbt "show nativeConfig;dynipNative/Compile/nativeLink;shutdown"
           cp target/out/native0.5/scala-3.9.0/dynip/dynip ${{ env.BINARY }}
       - name: Release packages
         uses: softprops/action-gh-release@v3

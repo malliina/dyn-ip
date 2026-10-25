@@ -10,6 +10,12 @@ inThisBuild(
   )
 )
 
+def linkingOptions =
+  if sys.env.contains("CI") then
+    Seq(s"-L/home/runner/work/dyn-ip/dyn-ip/s2n-tls/s2n-tls-install/lib")
+  else
+    Nil
+
 val dynip = crossProject(JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
   .in(file("."))
@@ -25,11 +31,14 @@ val dynip = crossProject(JVMPlatform, NativePlatform)
     buildInfoPackage := "com.malliina.dynip",
     buildInfoKeys ++= Seq[BuildInfoKey](
       "gitHash" -> gitHash
-    )
+    ),
+    nativeConfig ~= { c =>
+      c.withLinkingOptions(c.linkingOptions ++ linkingOptions)
+    }
   )
   .nativeSettings(
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %% "scala-java-time" % "2.8.0"
+      "io.github.cquiroz" %% "scala-java-time" % versions.scalajavatime
     )
   )
 

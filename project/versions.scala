@@ -5,5 +5,6 @@ object versions:
   val malliina = "6.18.0"
   val munit = "1.3.6"
   val scala = "3.9.0"
+  val scalajavatime = "2.8.0"
   val scribe = "3.19.0"
   val sjavatime = "1.5.0"
