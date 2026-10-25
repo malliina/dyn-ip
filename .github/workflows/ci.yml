@@ -15,4 +15,4 @@ jobs:
           java-version: 21
       - uses: sbt/setup-sbt@v1
       - name: Run tests
-        run: sbt dynipJVM/test
+        run: sbt "dynipJVM/test;shutdown"

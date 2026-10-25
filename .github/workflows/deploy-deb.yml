@@ -42,7 +42,7 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
       - name: Build with sbt
         run: |
-          sbt Deb/packageBin
+          sbt "Deb/packageBin;shutdown"
       - name: Deploy
         run: |
           scp target/out/jvm/scala-3.9.0/dynip/dynip.deb server:/home/mle/dynip.deb

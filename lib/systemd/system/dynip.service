@@ -1,0 +1,23 @@
+[Unit]
+Description=dynip backend
+Requires=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/share/dynip
+EnvironmentFile=/etc/default/dynip
+ExecStart=/usr/share/dynip/bin/dynip
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=60
+SuccessExitStatus=
+TimeoutStopSec=5
+User=dynip
+ExecStartPre=/bin/mkdir -p /run/dynip
+ExecStartPre=/bin/chown dynip:dynip /run/dynip
+ExecStartPre=/bin/chmod 755 /run/dynip
+PermissionsStartOnly=true
+LimitNOFILE=1024
+
+[Install]
+WantedBy=multi-user.target
