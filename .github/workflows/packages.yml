@@ -34,7 +34,7 @@ jobs:
           sbt "show nativeConfig;dynipNative/Compile/nativeLink;shutdown"
           cp target/out/native0.5/scala-3.9.0/dynip/dynip ${{ env.BINARY }}
       - name: Release packages
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           files: |
