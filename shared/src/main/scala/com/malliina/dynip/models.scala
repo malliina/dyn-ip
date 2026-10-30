@@ -2,6 +2,7 @@ package com.malliina.dynip
 
 import cats.Show
 import com.malliina.config.ConfigReadable
+import com.malliina.values.Readable
 import io.circe.{Codec, Decoder, Encoder}
 
 import scala.concurrent.duration.{DurationDouble, FiniteDuration}
@@ -10,6 +11,7 @@ opaque type ZoneId <: String = String
 object ZoneId:
   given show: Show[ZoneId] = z => z
   given ConfigReadable[ZoneId] = ConfigReadable.string.map(z => z)
+  given Readable[ZoneId] = Readable.string.map(identity)
 
 opaque type RecordId <: String = String
 object RecordId:
@@ -23,6 +25,7 @@ opaque type APIToken <: String = String
 object APIToken:
   given show: Show[APIToken] = t => t
   given ConfigReadable[APIToken] = ConfigReadable.string.map(t => t)
+  given Readable[APIToken] = Readable.string.map(identity)
 
 enum RecordType(val name: String):
   case A extends RecordType("A")

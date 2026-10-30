@@ -19,7 +19,6 @@ val dynip = crossProject(JVMPlatform, NativePlatform)
       "com.malliina" %% "http-client-ember" % versions.malliina,
       "com.malliina" %% "config" % versions.malliina,
       "com.outr" %% "scribe" % versions.scribe,
-//      "com.malliina" %% "logstreams-client" % versions.malliina,
       "org.scalameta" %% "munit" % versions.munit % Test
     ),
     buildInfoPackage := "com.malliina.dynip",
