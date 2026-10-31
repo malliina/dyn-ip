@@ -10,7 +10,7 @@ import sbt.*
 import sbt.Keys.*
 import sbtcompat.PluginCompat
 import scala.scalanative.sbtplugin.ScalaNativePlugin
-import scala.scalanative.sbtplugin.ScalaNativePlugin.autoImport.NativeLinkResult
+import scala.scalanative.sbtplugin.ScalaNativePlugin.autoImport.{nativeLink, NativeLinkResult}
 import xsbti.HashedVirtualFileRef
 
 object NativeDebPlugin extends AutoPlugin:
@@ -29,8 +29,8 @@ object NativeDebPlugin extends AutoPlugin:
     maintainer := "Michael Skogberg <malliina123@gmail.com>",
     Compile / packageDoc / mappings := Nil,
     Compile / packageDoc / publishArtifact := false,
-    binaryReplacement := Def.uncached(None),
-    Universal / mappings := Def.uncached {
+    binaryReplacement := Def.uncached(Option((Compile / nativeLink).value)),
+    Universal / mappings := Def.uncached:
       val name = (Universal / executableScriptName).value
       val ms: Seq[(HashedVirtualFileRef, String)] = (Universal / mappings).value
       ms.map: (src, dest) =>
@@ -41,8 +41,8 @@ object NativeDebPlugin extends AutoPlugin:
             ref -> dest
           .getOrElse:
             src -> dest
-    },
-    NativeDebian / linuxPackageMappings := {
+    ,
+    Debian / linuxPackageMappings := {
       val ms: Seq[LinuxPackageMapping] = (Debian / linuxPackageMappings).value
       ms
         .map: mapping =>
