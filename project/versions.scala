@@ -1,5 +1,5 @@
 object versions:
-  val app = "0.3.7"
+  val app = "0.3.8"
   val catsEffect = "3.7.1"
   val fs2 = "3.14.0"
   val malliina = "6.18.0"

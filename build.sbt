@@ -13,7 +13,7 @@ inThisBuild(
 val dynip = crossProject(JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
   .in(file("."))
-  .enablePlugins(DebPlugin, BuildInfoPlugin)
+  .enablePlugins(NativeDebPlugin, BuildInfoPlugin)
   .settings(
     libraryDependencies ++= Seq(
       "com.malliina" %% "http-client-ember" % versions.malliina,
@@ -27,6 +27,7 @@ val dynip = crossProject(JVMPlatform, NativePlatform)
     )
   )
   .nativeSettings(
+    binaryReplacement := Option((Compile / nativeLink).value),
     libraryDependencies ++= Seq(
       "io.github.cquiroz" %% "scala-java-time" % versions.scalajavatime
     )
