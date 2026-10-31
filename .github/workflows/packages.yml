@@ -34,11 +34,14 @@ jobs:
       - name: Test and build
         run: |
           echo "Building ${{ env.BINARY }}..."
-          sbt "show nativeConfig;dynipNative/Compile/nativeLink;shutdown"
-          cp target/out/native0.5/scala-3.9.0/dynip/dynip ${{ env.BINARY }}
+          sbt "show nativeConfig;dynipNative/NativeDebian/packageBin;shutdown"
+          cd target/out/native0.5/scala-3.9.0/dynip
+          cp dynip ${{ env.BINARY }}
       - name: Release packages
         uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/v')
         with:
+          working_directory: target/out/native0.5/scala-3.9.0/dynip
           files: |
             ${{ env.BINARY }}
+            ${{ env.BINARY }}.deb
